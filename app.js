@@ -12,6 +12,7 @@ import indexRouter from "./src/routes/index.js";
 // Import routers
 import usersRouter from "./src/routes/users.js";
 import notesRouter from "./src/routes/Notes.js";
+import { AuthToken } from "./src/Middleware/Auth/AuthToken.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

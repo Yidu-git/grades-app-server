@@ -95,20 +95,31 @@ CREATE TABLE `Users`(
     `email` VARCHAR(255) NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
-    `varificatoin_code` varchar(10),
-    `is_verified` BOOLEAN NOT NULL DEFAULT FALSE,
+    `is_verified` BOOLEAN NULL DEFAULT FALSE,
     `verified_at` DATETIME NULL,
     `password_hash` VARCHAR(255) NOT NULL,
     `API_KEY` varchar(255) NOT NULL,
 --    `WRITE_API_KEY` varchar(255) NOT NULL,
 --    `RESOURCE_API_KEY` varchar(255) NOT NULL,
-    `salt` VARCHAR(255) NOT NULL,
     `pfp_URL` LINESTRING NULL
 );
 ALTER TABLE
     `Users` ADD UNIQUE `users_username_unique`(`username`);
 ALTER TABLE
     `Users` ADD UNIQUE `users_email_unique`(`email`);
+
+CREATE TABLE `verification_codes` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `email` VARCHAR(255),
+    `code` VARCHAR(255)
+);
+
+CREATE TABLE `refresh_tokens` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	`username` VARCHAR(20) NOT NULL,
+	`token` LONGTEXT NOT NULL
+);
+    
 CREATE TABLE `Lessons`(
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `title` VARCHAR(255) NOT NULL,

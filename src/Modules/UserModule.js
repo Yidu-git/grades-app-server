@@ -36,13 +36,12 @@ export const createUser = async (data) => {
     data;
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-  const verification_code = await genrate_verification_code();
   const API_KEY = await generateAPIKEY(50);
   const date = new Date();
 
   const query = `
-    INSERT INTO users (displayname, username, email, password_hash, first_name, last_name, created_at, salt, is_verified, pfp_URL, varificatoin_code, API_KEY)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO users (displayname, username, email, password_hash, first_name, last_name, created_at, API_KEY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const values = [
     displayname,
@@ -52,14 +51,13 @@ export const createUser = async (data) => {
     first_name,
     last_name,
     date,
-    salt,
-    false,
-    null,
-    verification_code,
     API_KEY,
   ];
-  const result = await pool.query(query, values);
-  return result.rows[0];
+  const [result] = await pool.query(query, values);
+  const [rows] = await pool.query("SELECT * FROM users WHERE id = ?", [
+    result.insertId,
+  ]);
+  return rows[0];
 };
 
 export const verifyUserEmail = async (email, verificationCode) => {
@@ -83,7 +81,6 @@ export const getUserByEmail = async (email) => {
   const [rows] = await pool.execute(`SELECT * FROM users WHERE email = (?)`, [
     email,
   ]);
-  // return username;
   return rows[0];
 };
 

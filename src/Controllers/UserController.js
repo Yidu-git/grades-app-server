@@ -15,35 +15,25 @@ import {
   loginUser,
   deleteUserAdmin,
 } from "../Modules/UserModule.js";
-
-// export const registerUser = async (req, res) => {
-//   const { displayname, username, email, first_name, last_name, password } =
-//     req.body;
-//   try {
-//     const newUser = await createUser(
-//       displayname,
-//       username,
-//       email,
-//       first_name,
-//       last_name,
-//       password
-//     );
-//     res.status(201).json(newUser);
-//   } catch (error) {
-//     res.status(400).json({ error: error.message });
-//   }
-// };
+// import * as JWT from "jsonwebtoken";
+// const jwt = JWT;
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../Middleware/Auth/AuthToken.js";
+dotenv.config();
 
 export const registerUser = async (req, res) => {
   const data = req.body;
   try {
     const newUser = await createUser(data);
-    res.status(201).json(newUser);
+    res.status(201).json({ message: "user created" });
   } catch (error) {
     res.status(500).json({
       error: "Failed to register",
       errorDetails: error.message,
-      recievedData: data,
     });
   }
 };
@@ -62,12 +52,16 @@ export const login = async (req, res) => {
   const { identifier, password } = req.body;
   try {
     const user = await loginUser(identifier, password);
-    res.status(200).json(user);
+    const refresh_token = await generateRefreshToken({
+      name: user.username,
+      email: user.email,
+    });
+    const token = generateAccessToken({ name: user.username });
+    res.status(200).json({ token: token, refresh_token: refresh_token });
   } catch (error) {
     res.status(400).json({
       error: "Error while attempting to login",
       errorDetails: error.message,
-      recieved: { identifier, password },
     });
   }
 };
@@ -226,8 +220,8 @@ export const searchUsersByDisplayName = async (searchTerm) => {
 export const removeUserAdmin = async (req, res) => {
   const id = req.params.id;
   try {
-    await deleteUserAdmin(id);
     const user = await getUserById(id);
+    await deleteUserAdmin(id);
     if (user) {
       res.status(200).json({ message: "User deleted successfully" });
     } else {
