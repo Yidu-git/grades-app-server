@@ -14,6 +14,7 @@ import {
   getUserPrivateInfoById,
   loginUser,
   deleteUserAdmin,
+  getAllPublicUsers,
 } from "../Modules/UserModule.js";
 // import * as JWT from "jsonwebtoken";
 // const jwt = JWT;
@@ -28,8 +29,15 @@ dotenv.config();
 export const registerUser = async (req, res) => {
   const data = req.body;
   try {
-    const newUser = await createUser(data);
-    res.status(201).json({ message: "user created" });
+    if (await getUserByUsername(data.username)) {
+      res.status(400).json("username is already taken");
+    }
+    if (await getUserByEmail(data.email)) {
+      res.status(400).json("email already exists");
+    } else {
+      const newUser = await createUser(data);
+      res.status(201).json({ message: "user created" });
+    }
   } catch (error) {
     res.status(500).json({
       error: "Failed to register",
@@ -57,11 +65,14 @@ export const login = async (req, res) => {
       email: user.email,
     });
     const token = generateAccessToken({ name: user.username });
-    res.status(200).json({ token: token, refresh_token: refresh_token });
+    res
+      .status(200)
+      .json({ token: token, refresh_token: refresh_token, user: user });
   } catch (error) {
     res.status(400).json({
       error: "Error while attempting to login",
       errorDetails: error.message,
+      recieved: [identifier, password],
     });
   }
 };
@@ -115,22 +126,33 @@ export const uploadProfilePicture = async (req, res) => {
 // ADMIN CONTROLLERS
 export const fetchAllUsers = async (req, res) => {
   try {
+    const user = req.user;
+    // if (user.role === "admin") {
+    //ADD check if user exists
     const users = await getAllUsers();
     res.status(200).json(users);
+    // } else res.status(403);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch users", message: error });
+    res
+      .status(400)
+      .json({ error: "Failed to fetch users", message: error.message });
     // res.status(200).json(users);
   }
 };
 
 export const deleteUserAccount = async (req, res) => {
-  const userId = req.params.id;
-  const { passwordHash } = req.body;
+  const username = req.params.username;
+  const user = await getUserByUsername(username);
   try {
-    await deleteUser(userId, passwordHash);
-    res.status(200).json({ message: "User deleted successfully" });
+    const { password } = req.body;
+    if (user) {
+      await deleteUser(user.id, password, user.password_hash);
+      res.status(200).json({ message: "User deleted successfully" });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
   } catch (error) {
-    res.status(500).json({
+    res.status(400).json({
       error: "Failed to delete user",
       errorDetails: error.message,
     });
@@ -163,19 +185,12 @@ export const resetPassword = async (req, res) => {
   }
 };
 export const fetchAllPublicUsers = async (req, res) => {
-  const userId = req.params.id;
   try {
-    const user = await getUserPublicInfoById(userId);
-    if (user) {
-      res.status(200).json(user);
-    } else {
-      res.status(404).json({ error: "User not found" });
-    }
+    const limit = req.params.limit;
+    const users = await getAllPublicUsers(limit);
+    res.status(200).json(users);
   } catch (error) {
-    res.status(500).json({
-      error: "Failed to fetch user public info",
-      errorDetails: error.message,
-    });
+    res.status(400).json({ error: error.message });
   }
 };
 

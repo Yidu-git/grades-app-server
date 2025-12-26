@@ -27,10 +27,6 @@ export const generateAPIKEY = async (length = 20) => {
   return API_KEY;
 };
 
-const verifyPassword = async (password, hash) => {
-  return bcrypt.compare(password, hash);
-};
-
 export const createUser = async (data) => {
   const { displayname, username, email, password, first_name, last_name } =
     data;
@@ -77,6 +73,12 @@ const getPublicInfoByField = async (field, value) => {
   return result.rows[0];
 };
 
+export const getAllPublicUsers = async (lim) => {
+  const query = `SELECT displayname,username,pfp_URL,created_at,email FROM users LIMIT ${lim}`;
+  const [result] = await pool.query(query);
+  return result;
+};
+
 export const getUserByEmail = async (email) => {
   const [rows] = await pool.execute(`SELECT * FROM users WHERE email = (?)`, [
     email,
@@ -112,15 +114,13 @@ const updateUserPassword = async (id, newPassword) => {
   return result.rows[0];
 };
 
-export const deleteUser = async (id, passwordHash) => {
+export const deleteUser = async (id, password) => {
   const user = await getUserById(id);
   if (!user) {
     throw new Error("User not found");
   }
-  const isPasswordValid = await bcrypt.compare(
-    passwordHash,
-    user.password_hash
-  );
+  // const passwordHash = await bcrypt.hash(password, salt);
+  const isPasswordValid = await bcrypt.compare(password, user.password_hash);
   if (!isPasswordValid) {
     throw new Error("Invalid password");
   }

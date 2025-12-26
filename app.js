@@ -12,7 +12,8 @@ import indexRouter from "./src/routes/index.js";
 // Import routers
 import usersRouter from "./src/routes/users.js";
 import notesRouter from "./src/routes/Notes.js";
-import { AuthToken } from "./src/Middleware/Auth/AuthToken.js";
+import { AuthToken, generateToken } from "./src/Middleware/Auth/AuthToken.js";
+import { login, registerUser } from "./src/Controllers/UserController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,28 +21,20 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Enable CORS for all routes
+app.use(cors());
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     credentials: true,
+//     allowedHeaders: ["Content-Type", "Authorization", "token"], // Add your custom header here
+//   })
+// );
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://grade-manager-beta.netlify.app",
 ];
-
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       // Allow requests with no origin (like mobile apps or curl)
-//       if (!origin) return callback(null, true);
-
-//       if (allowedOrigins.indexOf(origin) === -1) {
-//         const msg =
-//           "The CORS policy for this site does not allow access from the specified Origin.";
-//         return callback(new Error(msg), false);
-//       }
-//       return callback(null, true);
-//     },
-//     credentials: true,
-//   })
-// );
-
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -76,8 +69,12 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 
 // Routes for notes
-app.use("/notes", notesRouter);
-app.use("/users", usersRouter);
+app.use("/notes", AuthToken, notesRouter);
+app.use("/users", AuthToken, usersRouter);
+// Signup and Login
+app.post("/register", registerUser);
+app.post("/login", login);
+app.get("/refresh", generateToken);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -78,15 +78,19 @@ CREATE TABLE `Courses`(
 CREATE TABLE `Notes`(
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `UserID` BIGINT NOT NULL,
+	`UserName` varchar(255),
     `Private` BOOL NOT NULL DEFAULT TRUE,
     `title` VARCHAR(50) NOT NULL,
-    `note` MULTILINESTRING NULL,
+    `note` TEXT NULL,
     `CourseID` BIGINT NULL,
     `description` TEXT NULL,
+    `created_at` DATETIME NOT NULL,
     `tags` JSON NULL,
     `unit` VARCHAR(20) NULL,
-    `catagory` VARCHAR(255) NULL
+    `category` VARCHAR(255) NULL
 );
+ALTER TABLE Notes MODIFY COLUMN tags JSON;
+
 CREATE TABLE `Users`(
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `created_at` DATETIME NOT NULL,

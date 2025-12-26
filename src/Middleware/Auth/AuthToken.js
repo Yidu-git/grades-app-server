@@ -9,7 +9,7 @@ import {
 } from "./tokenModule.js";
 
 export const generateAccessToken = (user) => {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "30m" });
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "10s" });
 };
 
 export const generateToken = async (req, res) => {
@@ -25,8 +25,8 @@ export const generateToken = async (req, res) => {
         .status(403)
         .json({ error: "Invalid refresh token", data: req.headers });
     const tokenExists = await findRefreshToken(user.name);
-    if (tokenExists.token === refresh_token) {
-      const token = generateAccessToken({ ...user });
+    if (tokenExists?.token === refresh_token) {
+      const token = generateAccessToken({ name: user.name });
       return res.status(200).json(token);
     } else {
       res.status(403).json("Forbiden");

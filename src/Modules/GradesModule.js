@@ -1,2 +1,6 @@
 import pool from "../config/db.js";
-import bcrypt from "bcryptjs";
+
+export const submitGrade = async (data) => {
+  const { score, maxscore } = data;
+};
+// Under development
