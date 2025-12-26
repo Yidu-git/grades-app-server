@@ -40,7 +40,11 @@ export const postNote = async (req, res) => {
 
 export const DeleteNote = async (req, res) => {
   try {
+    const user = req.user;
     const id = req.params.id;
+    if (user.name !== (await findNote(id)).UserName) {
+      return res.status(403).json("You are not authorized to delete this note");
+    }
     if (await findNote(id)) {
       await deleteNote(id);
       res.status(200).json("Note deleted successfully");
