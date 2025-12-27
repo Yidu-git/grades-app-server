@@ -20,8 +20,9 @@ export const fetchNotes = async (req, res) => {
 
 export const fetchPublicNotes = async (req, res) => {
   try {
+    const user = req.user;
     const limit = req.params.limit;
-    const notes = await getPublicNotes(limit);
+    const notes = await getPublicNotes(user, limit);
     res.status(200).json(notes);
   } catch (error) {
     res.status(500).json({ error: error.message });

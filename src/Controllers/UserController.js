@@ -1,6 +1,5 @@
 import {
   createUser,
-  verifyUserEmail,
   getUserByEmail,
   getUserByUsername,
   getUserById,
@@ -10,7 +9,6 @@ import {
   updateUserDetails,
   searchUsers,
   resetUserPassword,
-  getUserPublicInfoById,
   getUserPrivateInfoById,
   loginUser,
   deleteUserAdmin,
@@ -43,16 +41,6 @@ export const registerUser = async (req, res) => {
       error: "Failed to register",
       errorDetails: error.message,
     });
-  }
-};
-
-export const verifyEmail = async (req, res) => {
-  const { email, verificationCode } = req.body;
-  try {
-    await verifyUserEmail(email, verificationCode);
-    res.status(200).json({ message: "Email verified successfully" });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
   }
 };
 

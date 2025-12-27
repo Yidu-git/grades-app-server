@@ -52,16 +52,17 @@ export const findNote = async (id) => {
   return rows[0];
 };
 
-export const getPublicNotes = async (limit) => {
+export const getPublicNotes = async (user, limit) => {
   if (limit === "0") {
     const [rows] = await pool.execute(
-      "SELECT * FROM notes WHERE Private = false"
+      "SELECT * FROM notes WHERE Private = false OR UserName = ?",
+      [user.name]
     );
     return rows;
   }
   const [rows] = await pool.execute(
-    "SELECT * FROM notes WHERE Private = false LIMIT ?",
-    [limit]
+    "SELECT * FROM notes WHERE Private = false OR UserName = ? LIMIT ?",
+    [user.name, limit]
   );
   return rows;
 };

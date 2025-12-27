@@ -3,7 +3,6 @@ import {
   fetchAllUsers,
   fetchAllPublicUsers,
   registerUser,
-  verifyEmail,
   login,
   fetchUserProfile,
   getUserProfileByusername,
